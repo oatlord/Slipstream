@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.InputSystem.Controls;
@@ -15,12 +16,13 @@ public class PlayerMovement : MonoBehaviour
     public float rotationSpeed = 100f;
     public float pushForce = 10f;
     public float slowDownSpeed = 5f;
+    public float pushActionCooldown = 0.5f; // Cooldown duration in seconds
 
     // Private References
     private Rigidbody puckRigidbody;
-
-    // Debug Variables
     private bool isSlowDownPerformed = false;
+    private bool isPushPerformed = false;
+    private bool isPushOnCooldown = false;
 
     void Awake()
     {
@@ -35,7 +37,8 @@ public class PlayerMovement : MonoBehaviour
 
         inputActions.Player.MoveStick.performed += ctx => RotateAroundPuck();
 
-        inputActions.Player.PushPuck.performed += ctx => PushPuck();
+        inputActions.Player.PushPuck.performed += ctx => isPushPerformed = true;
+        inputActions.Player.PushPuck.canceled += ctx => isPushPerformed = false;
 
         inputActions.Player.StopPuck.performed += ctx => isSlowDownPerformed = true;
         inputActions.Player.StopPuck.canceled += ctx => isSlowDownPerformed = false;
@@ -47,9 +50,10 @@ public class PlayerMovement : MonoBehaviour
 
         inputActions.Player.MoveStick.performed -= ctx => RotateAroundPuck();
 
-        inputActions.Player.PushPuck.performed -= ctx => PushPuck();
+        inputActions.Player.PushPuck.performed -= ctx => isPushPerformed = true;
+        inputActions.Player.PushPuck.canceled -= ctx => isPushPerformed = false;
 
-        inputActions.Player.StopPuck.started -= ctx => isSlowDownPerformed = true;
+        inputActions.Player.StopPuck.performed -= ctx => isSlowDownPerformed = true;
         inputActions.Player.StopPuck.canceled -= ctx => isSlowDownPerformed = false;
     }
 
@@ -71,6 +75,12 @@ public class PlayerMovement : MonoBehaviour
         {
             StopPuck();
         }
+
+        if (isPushPerformed && !isPushOnCooldown)
+        {
+            PushPuck();
+            StartCoroutine(PushCooldown());
+        }
     }
 
     void RotateAroundPuck()
@@ -81,6 +91,7 @@ public class PlayerMovement : MonoBehaviour
 
     void PushPuck()
     {
+        Debug.Log("Pushing puck!");
         puckRigidbody.AddForceAtPosition(hockeyStick.transform.forward * pushForce, hockeyStick.transform.position, ForceMode.Impulse);
     }
 
@@ -89,4 +100,10 @@ public class PlayerMovement : MonoBehaviour
         puckRigidbody.velocity = Vector3.LerpUnclamped(puckRigidbody.velocity, Vector3.zero, Time.deltaTime * slowDownSpeed);
     }
 
+    IEnumerator PushCooldown()
+    {
+        isPushOnCooldown = true;
+        yield return new WaitForSeconds(pushActionCooldown);
+        isPushOnCooldown = false;
+    }
 }
