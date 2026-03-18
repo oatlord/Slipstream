@@ -156,6 +156,7 @@ MonoBehaviour:
   rotationSpeed: 10
   pushForce: 10
   slowDownSpeed: 2
+  pushActionCooldown: 1
 --- !u!4 &26391663
 Transform:
   m_ObjectHideFlags: 0
