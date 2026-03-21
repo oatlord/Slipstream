@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class KillObstacle : MonoBehaviour
+public class WinScript : MonoBehaviour
 {
     [Header("Spawn Point")]
     public Transform spawnPoint;
@@ -20,7 +21,7 @@ public class KillObstacle : MonoBehaviour
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Player")
         {
-            GameState.Instance.RespawnPlayer(collision);
+            SceneManager.LoadScene("Win");
         }
     }
 }

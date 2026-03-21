@@ -1,10 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class KillObstacle : MonoBehaviour
+public class KillBoundary : MonoBehaviour
 {
     [Header("Spawn Point")]
     public Transform spawnPoint;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -17,10 +18,10 @@ public class KillObstacle : MonoBehaviour
         
     }
 
-    void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.tag == "Player")
+    void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "Player")
         {
-            GameState.Instance.RespawnPlayer(collision);
+            GameState.Instance.RespawnPlayer(other);
         }
     }
 }
